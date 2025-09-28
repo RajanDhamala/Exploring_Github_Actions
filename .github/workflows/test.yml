@@ -56,9 +56,9 @@ jobs:
       #  Build the Docker image
       - name: Build Docker Image
         run: |
-          docker build -t ghcr.io/RajanDhamala/exploring_github_actions-frontend:latest ./actionfront
+          docker build -t ghcr.io/rajandhamala/exploring_github_actions-frontend:latest ./actionfront
 
       #  Push the Docker image to GHCR
       - name: Push Docker Image
         run: |
-          docker push ghcr.io/RajanDhamala/exploring_github_actions-frontend:latest
+          docker push ghcr.io/rajandhamala/exploring_github_actions-frontend:latest
