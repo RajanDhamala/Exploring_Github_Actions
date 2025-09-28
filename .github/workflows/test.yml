@@ -1,27 +1,61 @@
-name: testing Actions
+name: Build and Dockerize Frontend
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
+
+permissions:
+  contents: read
+  packages: write  # Required to push Docker images to GHCR
 
 jobs:
-  job1:
+  build-and-dockerize:
     runs-on: ubuntu-latest
+     # Injecting environment variable for build time
     steps:
-      - name: Action 1
-        run: echo "Hello from action 1"
+      #  Checkout the repository
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
+      # ️ Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
+      #⃣ Install dependencies
+      - name: Install Dependencies
+        run: npm install
 
-  job2:
-    runs-on: ubuntu-latest
-    steps:
-        - name: Action 2 
-          run: echo "Hello from action 2"
- 
+      #⃣ Build the Vite app
+      - name: Build Vite App
+        run: npm run build
 
-  job3:
-    runs-on: ubuntu-latest
-    steps:
-        - name: Action 4
-          run : echo "Hello from action 3"
+      # Verify the 'dist' directory exists
+      - name: Check dist directory existence
+        run: |
+          if [ -d "dist" ]; then
+            echo "dist directory exists"
+          else
+            echo "dist directory is missing!"
+            exit 1
+          fi
+
+      # ⃣ Log in to GitHub Container Registry
+      - name: Log in to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      #⃣ Build the Docker image
+      - name: Build Docker Image
+        run: |
+          docker build -t ghcr.io/RajanDhamala/exploring_github_actions-frontend:latest ./actionfront
+
+      #  Push the Docker image to GHCR
+      - name: Push Docker Image
+        run: |
+          docker push ghcr.io/RajanDhamala/exploring_github_actions-frontend:latest
+
