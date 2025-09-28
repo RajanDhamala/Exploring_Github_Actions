@@ -11,37 +11,41 @@ permissions:
 jobs:
   build-and-dockerize:
     runs-on: ubuntu-latest
-     # Injecting environment variable for build time
+    env:
+      VITE_API_URL: ${{ secrets.VITE_BASE_URL }}  # Inject build-time env
     steps:
-      #  Checkout the repository
+      #  Checkout repository
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # ️ Set up Node.js
+      # Set up Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      #⃣ Install dependencies
+      # Install dependencies
       - name: Install Dependencies
         run: npm install
+        working-directory: ./actionfront
 
-      #⃣ Build the Vite app
+      # Build the Vite app
       - name: Build Vite App
         run: npm run build
+        working-directory: ./actionfront
 
-      # Verify the 'dist' directory exists
+      #  Verify the 'dist' directory exists
       - name: Check dist directory existence
         run: |
           if [ -d "dist" ]; then
-            echo "dist directory exists"
+            echo " dist directory exists"
           else
-            echo "dist directory is missing!"
+            echo " dist directory missing!"
             exit 1
           fi
+        working-directory: ./actionfront
 
-      # ⃣ Log in to GitHub Container Registry
+      #  Log in to GitHub Container Registry
       - name: Log in to GHCR
         uses: docker/login-action@v2
         with:
@@ -49,7 +53,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      #⃣ Build the Docker image
+      #  Build the Docker image
       - name: Build Docker Image
         run: |
           docker build -t ghcr.io/RajanDhamala/exploring_github_actions-frontend:latest ./actionfront
@@ -58,4 +62,3 @@ jobs:
       - name: Push Docker Image
         run: |
           docker push ghcr.io/RajanDhamala/exploring_github_actions-frontend:latest
-
